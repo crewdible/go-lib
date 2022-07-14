@@ -8,16 +8,27 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type CustomValidator struct {
-	validator *validator.Validate
+type ErrorValidateResponse struct {
+	FailedField string `json:"failed_field,omitempty"`
+	Tag         string `json:"tag,omitempty"`
+	Value       string `json:"value,omitempty"`
 }
 
-func NewCustomValidator() *CustomValidator {
-	return &CustomValidator{validator: validator.New()}
-}
+var validate = validator.New()
 
-func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
+func Validate(s interface{}) []*ErrorValidateResponse {
+	var errors []*ErrorValidateResponse
+	err := validate.Struct(s)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			var element ErrorValidateResponse
+			element.FailedField = err.StructNamespace()
+			element.Tag = err.Tag()
+			element.Value = err.Param()
+			errors = append(errors, &element)
+		}
+	}
+	return errors
 }
 
 func Empty(v reflect.Value) bool {
