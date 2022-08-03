@@ -2,6 +2,7 @@ package logs
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -46,4 +47,13 @@ func MpWriteApiLog(clsName, fnName, content, ip string, singleFile bool) {
 
 	// optional: log date-time, filename, and line number
 	log.Println(fmt.Sprintf("%s\n", content))
+}
+
+func ByteToFile(fileName string, byteArray []byte) error {
+	err := ioutil.WriteFile(fileName, byteArray, 0644)
+	if err != nil {
+		return err
+	}
+
+	return err
 }
