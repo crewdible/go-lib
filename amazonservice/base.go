@@ -1,36 +1,32 @@
 package amazonservice
 
 import (
-	"os"
+	"context"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-var awsSess *session.Session
+type AwsSession struct {
+	Config   aws.Config
+	S3Client *s3.Client
+}
+
+var awsSess AwsSession
 
 func InitAws() error {
 	var err error
-	AccessKeyID := os.Getenv("AWS_KEY_ID")
-	SecretAccessKey := os.Getenv("AWS_SECRET")
-	MyRegion := os.Getenv("AWS_REGION")
-	awsSess, err = session.NewSession(
-		&aws.Config{
-			Region: aws.String(MyRegion),
-			Credentials: credentials.NewStaticCredentials(
-				AccessKeyID,
-				SecretAccessKey,
-				"", // a token will be created when the session it's used.
-			),
-		})
+	awsSess.Config, err = config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		return err
 	}
 
+	awsSess.S3Client = s3.NewFromConfig(awsSess.Config)
+
 	return err
 }
 
-func AwsManager() *session.Session {
+func AwsManager() AwsSession {
 	return awsSess
 }

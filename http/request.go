@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 )
 
@@ -34,7 +35,7 @@ func Request(method, url string, header map[string]string, body interface{}, dat
 	return err
 }
 
-func RequestByteFile(method, url string, header map[string]string, body interface{}, errData interface{}, byteRes *[]byte) error {
+func RequestByteFile(method, url string, header map[string]string, body interface{}, byteRes *[]byte) error {
 	var client = &http.Client{}
 
 	bodyJSON, err := json.Marshal(body)
@@ -54,21 +55,9 @@ func RequestByteFile(method, url string, header map[string]string, body interfac
 	}
 	defer resp.Body.Close()
 
-	err = json.NewDecoder(resp.Body).Decode(&errData)
+	*byteRes, err = io.ReadAll(resp.Body)
 	if err != nil {
-		// *byteRes, err = io.ReadAll(resp.Body)
-		err = json.NewDecoder(resp.Body).Decode(&byteRes)
-		if err != nil {
-			return err
-		}
-		// Use this to write file from response (If can)
-		// src : https://stackoverflow.com/questions/16311232/how-to-pipe-an-http-response-to-a-file-in-go
-		// f, e := os.Create("filename.pdf")
-		// if err != nil {
-		// 	return err
-		// }
-		// defer f.Close()
-		// f.ReadFrom(resp.Body)
+		return err
 	}
 
 	return err

@@ -1,8 +1,8 @@
 package logs
 
 import (
+	"encoding/base64"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -50,10 +50,24 @@ func MpWriteApiLog(clsName, fnName, content, ip string, singleFile bool) {
 }
 
 func ByteToFile(fileName string, byteArray []byte) error {
-	err := ioutil.WriteFile(fileName, byteArray, 0644)
+	enc := base64.StdEncoding.EncodeToString(byteArray)
+
+	dec, err := base64.StdEncoding.DecodeString(enc)
+	if err != nil {
+		panic(err)
+	}
+
+	f, err := os.Create(fileName)
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
+	if _, err := f.Write(dec); err != nil {
+		return err
+	}
+	if err := f.Sync(); err != nil {
+		return err
+	}
 	return err
 }
