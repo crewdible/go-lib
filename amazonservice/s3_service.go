@@ -3,8 +3,11 @@ package amazonservice
 import (
 	"bytes"
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
@@ -12,11 +15,22 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
+func generateKey(createdAt, folder, key, filePath string) string {
+	var fileName string
+	lfile := strings.Split(filePath, "/")
+	if lfile[len(lfile)-2] == "thumbs" {
+		fileName = fmt.Sprintf("thumbs/%s", lfile[len(lfile)-1])
+	} else {
+		fileName = lfile[len(lfile)-1]
+	}
+	return fmt.Sprintf("%s/%s/%s/%s", createdAt, folder, key, fileName)
+}
+
 // func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, strgClass, fileName string) error {
-func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, strgClass, fileName string) error {
+func (a AwsSession) UploadFileToS3(bucket, key, acl, filePath, folder, createdAt string) error {
 
 	// open the file for use
-	file, err := os.Open(fileName)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return err
 	}
@@ -43,13 +57,13 @@ func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, st
 	// you're uploading
 	uploader := manager.NewUploader(a.S3Client)
 	_, err = uploader.Upload(context.TODO(), &s3.PutObjectInput{
-		Bucket:             aws.String(bucket),
-		Key:                aws.String(fileName),
-		ACL:                aclType,
-		Body:               bytes.NewReader(buffer),
-		ContentLength:      *aws.Int64(size),
-		ContentType:        aws.String(http.DetectContentType(buffer)),
-		ContentDisposition: aws.String(cntntDisposition),
+		Bucket:        aws.String(bucket),
+		Key:           aws.String(generateKey(createdAt, folder, key, filePath)),
+		ACL:           aclType,
+		Body:          bytes.NewReader(buffer),
+		ContentLength: *aws.Int64(size),
+		ContentType:   aws.String(http.DetectContentType(buffer)),
+		// ContentDisposition: aws.String(cntntDisposition),
 		// ServerSideEncryption: aws.String(sSEnc),
 		// StorageClass:         aws.String(strgClass),
 	})
@@ -58,4 +72,23 @@ func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, st
 	}
 
 	return err
+}
+
+// request example UploadCrewFileToS3("crewdible-sandbox-outbound", "attachment", "public-read", "./files/pdf/output.pdf", "inv", "202208")
+func (a AwsSession) UploadCrewFileToS3(bucket, key, acl, filePath, folder, createdAt string) error {
+	err := a.UploadFileToS3(bucket, key, acl, filePath, folder, createdAt)
+	if err != nil {
+		return err
+	}
+	lfile := strings.Split(filePath, "/")
+	thumbsPath := fmt.Sprintf("./files/thumbs/%s", lfile[len(lfile)-1])
+	if _, err := os.Stat(thumbsPath); errors.Is(err, os.ErrNotExist) {
+	} else {
+		err := a.UploadFileToS3(bucket, key, acl, thumbsPath, folder, createdAt)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

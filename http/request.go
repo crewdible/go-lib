@@ -64,6 +64,8 @@ func RequestByteFile(method, url string, header map[string]string, body interfac
 	return err
 }
 
+// timoeut.Duration example => 1*time.Second
+// Can use time.Milliseconds, time.Nanoseconds, etc
 func RequestWithoutResponse(method, url string, header map[string]string, body interface{}, timeout time.Duration) error {
 	var client = &http.Client{
 		Timeout: timeout,
