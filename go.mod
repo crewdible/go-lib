@@ -3,10 +3,12 @@ module github.com/crewdible/go-lib
 go 1.18
 
 require (
+	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b
 	github.com/aws/aws-sdk-go-v2 v1.16.8
 	github.com/aws/aws-sdk-go-v2/config v1.15.15
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.21
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.2
+	github.com/boombuler/barcode v1.0.1
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/rabbitmq/amqp091-go v1.4.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
