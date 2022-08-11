@@ -32,6 +32,15 @@ func StructToMap(s interface{}) (map[string]interface{}, error) {
 	return inInterface, err
 }
 
+func StructToJsonString(strct interface{}) (string, error) {
+	jsonStr, err := json.Marshal(strct)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonStr), err
+}
+
 func MapToParam(url string, mapS map[string]interface{}) string {
 	res := url
 	for k, v := range mapS {
@@ -43,4 +52,19 @@ func MapToParam(url string, mapS map[string]interface{}) string {
 	}
 
 	return res
+}
+
+func ListToString[V int | string | float32 | float64](l []V) string {
+	var str string
+	str = fmt.Sprintf("%s[", str)
+	for i, s := range l {
+		if i == 0 {
+			str = fmt.Sprintf("%s%v", str, s)
+			continue
+		}
+		str = fmt.Sprintf("%s,%v", str, s)
+	}
+	str = fmt.Sprintf("%s]", str)
+
+	return str
 }

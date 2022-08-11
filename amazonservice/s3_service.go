@@ -28,7 +28,6 @@ func generateKey(createdAt, folder, key, filePath string) string {
 
 // func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, strgClass, fileName string) error {
 func (a AwsSession) UploadFileToS3(bucket, key, acl, filePath, folder, createdAt string) error {
-
 	// open the file for use
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -74,8 +73,11 @@ func (a AwsSession) UploadFileToS3(bucket, key, acl, filePath, folder, createdAt
 	return err
 }
 
-// request example UploadCrewFileToS3("crewdible-sandbox-outbound", "attachment", "public-read", "./files/pdf/output.pdf", "inv", "202208")
-func (a AwsSession) UploadCrewFileToS3(bucket, key, acl, filePath, folder, createdAt string) error {
+// request example UploadCrewFileToS3("ATTACHMENT", "public-read", "./files/pdf/output.pdf", "inv", "202208")
+func (a AwsSession) UploadCrewFileToS3(t, acl, filePath, folder, createdAt string) error {
+	bkList := getBucketKey(t)
+	bucket := bkList[0]
+	key := bkList[1]
 	err := a.UploadFileToS3(bucket, key, acl, filePath, folder, createdAt)
 	if err != nil {
 		return err

@@ -7,10 +7,12 @@ import (
 	"time"
 )
 
-func MpWriteApiLog(clsName, fnName, content, ip string, singleFile bool) {
+// tName is Type => "api", "consumer", etc
+func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) {
 	now := time.Now().UTC()
 	nowFmt := now.Format("20060102")
-	dirName := fmt.Sprintf("logs/%s/api/%s", nowFmt, clsName)
+	// API LOG PATH "logs/%s/api/%s"
+	dirName := fmt.Sprintf("logs/%s/%s/%s", nowFmt, tName, clsName)
 	if _, err := os.Stat(dirName); os.IsNotExist(err) {
 		// path/to/whatever does not exist
 		// use MkdirAll for nested directory
@@ -24,7 +26,7 @@ func MpWriteApiLog(clsName, fnName, content, ip string, singleFile bool) {
 	fileName := fmt.Sprintf("%s/%s.json", dirName, fnName)
 	logFile, err := os.OpenFile(fileName, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Panic(err)
+		log.Println(err)
 	}
 	defer logFile.Close()
 

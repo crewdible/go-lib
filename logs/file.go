@@ -45,6 +45,12 @@ func SaveFile(filePath string, content []byte) error {
 	return err
 }
 
+func RemoveFile(filePath string) error {
+	err := os.Remove(filePath)
+
+	return err
+}
+
 func ByteToFile(filePath string, byteArray []byte) error {
 	enc := base64.StdEncoding.EncodeToString(byteArray)
 
