@@ -48,4 +48,11 @@ func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) {
 
 	// optional: log date-time, filename, and line number
 	log.Println(fmt.Sprintf("%s\n", content))
+
+	// reset log settings
+	log.SetFlags(log.LstdFlags)
+
+	log.SetPrefix("")
+
+	log.SetOutput(os.Stdout)
 }
