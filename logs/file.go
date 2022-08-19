@@ -10,6 +10,11 @@ import (
 )
 
 func ExecuteTemplateHTML(data interface{}, generatedPath, templatePath string) error {
+	err := MkDirByFilePath(generatedPath)
+	if err != nil {
+		return err
+	}
+
 	tmplt, err := template.ParseFiles(templatePath)
 	if err != nil {
 		return err
