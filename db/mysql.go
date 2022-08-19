@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"gorm.io/driver/mysql"
+	mysql "go.elastic.co/apm/module/apmgormv2/v2/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -21,9 +21,9 @@ func InitMySQL() error {
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_NAME"),
 	)
-	db, err = gorm.Open(mysql.New(mysql.Config{
-		DSN: dsn, // data source name
-	}), &gorm.Config{})
+	db, err = gorm.Open(mysql.Open(
+		dsn, // data source name
+	), &gorm.Config{})
 
 	if err != nil {
 		return errors.New("MySQL Connection Error")

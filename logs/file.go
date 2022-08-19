@@ -1,9 +1,12 @@
 package logs
 
 import (
+	"bytes"
 	"encoding/base64"
 	"os"
 	"text/template"
+
+	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 )
 
 func ExecuteTemplateHTML(data interface{}, generatedPath, templatePath string) error {
@@ -27,7 +30,43 @@ func ExecuteTemplateHTML(data interface{}, generatedPath, templatePath string) e
 	return nil
 }
 
+func HtmlToPdf(filePath string, data []byte, dpi, height, width uint) error {
+	err := MkDirByFilePath(filePath)
+	if err != nil {
+		return err
+	}
+
+	pdfg, err := wkhtmltopdf.NewPDFGenerator()
+	if err != nil {
+		return err
+	}
+	page := wkhtmltopdf.NewPageReader(bytes.NewReader(data))
+	pdfg.AddPage(page)
+
+	pdfg.Orientation.Set(wkhtmltopdf.OrientationPortrait)
+	pdfg.Dpi.Set(dpi)
+	pdfg.PageHeight.Set(height)
+	pdfg.PageWidth.Set(width)
+
+	err = pdfg.Create()
+	if err != nil {
+		return err
+	}
+
+	err = pdfg.WriteFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func SaveFile(filePath string, content []byte) error {
+	err := MkDirByFilePath(filePath)
+	if err != nil {
+		return err
+	}
+
 	f, err := os.Create(filePath)
 	if err != nil {
 		return err

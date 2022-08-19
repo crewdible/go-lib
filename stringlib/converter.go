@@ -22,6 +22,7 @@ func MapToSortedStr(mapS map[string]interface{}) string {
 	return res
 }
 
+// Bug : format change if not string
 func StructToMap(s interface{}) (map[string]interface{}, error) {
 	var inInterface map[string]interface{}
 	inrec, err := json.Marshal(s)

@@ -8,25 +8,21 @@ import (
 )
 
 // tName is Type => "api", "consumer", etc
-func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) {
+func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) error {
 	now := time.Now().UTC()
 	nowFmt := now.Format("20060102")
 	// API LOG PATH "logs/%s/api/%s"
 	dirName := fmt.Sprintf("logs/%s/%s/%s", nowFmt, tName, clsName)
-	if _, err := os.Stat(dirName); os.IsNotExist(err) {
-		// path/to/whatever does not exist
-		// use MkdirAll for nested directory
-		err := os.MkdirAll(dirName, os.ModePerm)
-		if err != nil {
-			log.Println(err)
-		}
+	err := MkDir(dirName)
+	if err != nil {
+		return err
 	}
 
 	// open log file
 	fileName := fmt.Sprintf("%s/%s.json", dirName, fnName)
 	logFile, err := os.OpenFile(fileName, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 	defer logFile.Close()
 
@@ -55,4 +51,6 @@ func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) {
 	log.SetPrefix("")
 
 	log.SetOutput(os.Stdout)
+
+	return nil
 }
