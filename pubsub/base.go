@@ -64,7 +64,7 @@ func (c *Connection) GetQueues() []string {
 
 func (c *Connection) Connect() error {
 	var err error
-	amqpURI := fmt.Sprintf("amqp://%s:%s@%s:%s/", os.Getenv("RMQ_USER"), os.Getenv("RMQ_PASSWORD"), os.Getenv("RMQ_HOST"), os.Getenv("RMQ_PORT"))
+	amqpURI := fmt.Sprintf("%s://%s:%s@%s:%s/", os.Getenv("RMQ_PROTOCOL"), os.Getenv("RMQ_USER"), os.Getenv("RMQ_PASSWORD"), os.Getenv("RMQ_HOST"), os.Getenv("RMQ_PORT"))
 	c.conn, err = amqp.Dial(amqpURI)
 	if err != nil {
 		return fmt.Errorf("Error in creating rabbitmq connection with %s : %s", amqpURI, err.Error())
