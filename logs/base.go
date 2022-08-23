@@ -12,7 +12,7 @@ func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) e
 	now := time.Now().UTC()
 	nowFmt := now.Format("20060102")
 	// API LOG PATH "logs/%s/api/%s"
-	dirName := fmt.Sprintf("logs/%s/%s/%s", nowFmt, tName, clsName)
+	dirName := fmt.Sprintf("log/%s/%s/%s", nowFmt, tName, clsName)
 	err := MkDir(dirName)
 	if err != nil {
 		return err
