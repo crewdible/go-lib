@@ -2,7 +2,9 @@ package amazonservice
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -30,6 +32,45 @@ func InitAws() error {
 
 func AwsManager() AwsSession {
 	return awsSess
+}
+
+func GetAwsUrl(t, folder, fileName string, isThumb bool) string {
+	var tmb string
+	bkList := getBucketKey(t)
+	bucket := bkList[0]
+	key := bkList[1]
+
+	if key != "" {
+		key = fmt.Sprintf("%s/", key)
+	}
+
+	if isThumb {
+		tmb = "thumbs/"
+	}
+
+	return fmt.Sprintf("https://%s.s3.ap-southeast-1.amazonaws.com/%s%s%s%s", bucket, folder, key, tmb, fileName)
+}
+
+// default t => "ATTACHMENT", default isThumb => false
+func GetAttachments(t, files, folder, createdAt string, isThumb bool) string {
+	var awsResults []string
+	awsFiles := strings.Split(files, ";")
+	for _, file := range awsFiles {
+		atc := strings.Contains(file, "attachment")
+		if atc {
+			awsResults = append(awsResults, file)
+		} else {
+			if isThumb && len(file) > 4 && file[len(file)-4:] == ".pdf" {
+				continue
+			} else {
+				folderAws := fmt.Sprintf("%s/%s/", createdAt, folder)
+				awsUrl := GetAwsUrl(t, folderAws, file, isThumb)
+				awsResults = append(awsResults, awsUrl)
+			}
+		}
+	}
+
+	return strings.Join(awsResults, ";")
 }
 
 func getBucketKey(t string) []string {

@@ -22,6 +22,7 @@ type Message struct {
 	ContentType   string
 	CorrelationID string
 	Priority      uint8
+	Headers       amqp.Table
 	Body          MessageBody
 }
 

@@ -17,7 +17,7 @@ func (c *Connection) Publish(m Message) error {
 	}
 
 	p := amqp.Publishing{
-		// Headers:       amqp.Table{"type": m.Body.Type}, // NOT USED YET
+		Headers:     m.Headers,
 		ContentType: m.ContentType,
 		// CorrelationId: m.CorrelationID, // NOT USED YET
 		Body: m.Body.Data,

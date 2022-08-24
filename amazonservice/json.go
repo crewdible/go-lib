@@ -3,11 +3,8 @@ package amazonservice
 import (
 	"bytes"
 	"context"
-	"errors"
-	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
@@ -15,23 +12,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-func generateKey(createdAt, folder, key, filePath string) string {
-	var fileName string
-	lfile := strings.Split(filePath, "/")
-	if lfile[len(lfile)-2] == "thumbs" {
-		fileName = fmt.Sprintf("thumbs/%s", lfile[len(lfile)-1])
-	} else {
-		fileName = lfile[len(lfile)-1]
-	}
-	if key == "" {
-		return fmt.Sprintf("%s/%s/%s", createdAt, folder, fileName)
-	}
+func (a AwsSession) UploadJSONToS3(acl, filePath, folder, createdAt string) error {
+	bkList := getBucketKey("JSON")
+	bucket := bkList[0]
+	key := bkList[1]
 
-	return fmt.Sprintf("%s/%s/%s/%s", createdAt, folder, key, fileName)
-}
-
-// func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, strgClass, fileName string) error {
-func (a AwsSession) UploadFileToS3(bucket, key, acl, filePath, folder, createdAt string) error {
 	// open the file for use
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -75,26 +60,4 @@ func (a AwsSession) UploadFileToS3(bucket, key, acl, filePath, folder, createdAt
 	}
 
 	return err
-}
-
-// request example UploadCrewFileToS3("ATTACHMENT", "public-read", "./files/pdf/output.pdf", "inv", "202208")
-func (a AwsSession) UploadCrewFileToS3(t, acl, filePath, folder, createdAt string) error {
-	bkList := getBucketKey(t)
-	bucket := bkList[0]
-	key := bkList[1]
-	err := a.UploadFileToS3(bucket, key, acl, filePath, folder, createdAt)
-	if err != nil {
-		return err
-	}
-	lfile := strings.Split(filePath, "/")
-	thumbsPath := fmt.Sprintf("./files/thumbs/%s", lfile[len(lfile)-1])
-	if _, err := os.Stat(thumbsPath); errors.Is(err, os.ErrNotExist) {
-	} else {
-		err := a.UploadFileToS3(bucket, key, acl, thumbsPath, folder, createdAt)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

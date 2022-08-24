@@ -1,0 +1,1 @@
+Penamaan berdasarkan TYPE => getBucketKey(t string)
