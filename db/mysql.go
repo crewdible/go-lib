@@ -3,25 +3,24 @@ package db
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	mysql "go.elastic.co/apm/module/apmgormv2/v2/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+var db = make(map[string]*gorm.DB)
 var err error
 
 // Init - mysql init
-func InitMySQL() error {
+func InitMySQL(connName, dbUser, dbPassword, dbHost, dbPort, dbName string) error {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_NAME"),
+		dbUser,
+		dbPassword,
+		dbHost,
+		dbPort,
+		dbName,
 	)
-	db, err = gorm.Open(mysql.Open(
+	db[connName], err = gorm.Open(mysql.Open(
 		dsn, // data source name
 	), &gorm.Config{})
 
@@ -33,6 +32,6 @@ func InitMySQL() error {
 }
 
 // DbManager - return db connection
-func MySQLManager() *gorm.DB {
+func MySQLManager() map[string]*gorm.DB {
 	return db
 }
