@@ -25,7 +25,8 @@ func InitMySQL(connName, dbUser, dbPassword, dbHost, dbPort, dbName string) erro
 	), &gorm.Config{})
 
 	if err != nil {
-		return errors.New("MySQL Connection Error")
+		msg := fmt.Sprintf("Connection %s => MySQL Connection Error", connName)
+		return errors.New(msg)
 	}
 
 	return err
