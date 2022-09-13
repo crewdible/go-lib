@@ -42,6 +42,10 @@ func StructToJsonString(strct interface{}) (string, error) {
 	return string(jsonStr), err
 }
 
+func JsonStringToStruct(jsonStr string, strct interface{}) error {
+	return json.Unmarshal([]byte(jsonStr), &strct)
+}
+
 func MapToParam(url string, mapS map[string]interface{}) string {
 	res := url
 	for k, v := range mapS {
