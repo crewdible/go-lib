@@ -8,8 +8,12 @@ import (
 )
 
 // tName is Type => "api", "consumer", etc
+// TIMEZONE Asia/Jakarta
 func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) error {
-	now := time.Now().UTC()
+	// now := time.Now().UTC()
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	now := time.Now().In(loc)
+
 	nowFmt := now.Format("20060102")
 	// API LOG PATH "logs/%s/api/%s"
 	dirName := fmt.Sprintf("log/%s/%s/%s", nowFmt, tName, clsName)
