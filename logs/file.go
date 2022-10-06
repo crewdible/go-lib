@@ -2,7 +2,6 @@ package logs
 
 import (
 	"bytes"
-	"encoding/base64"
 	"os"
 	"text/template"
 
@@ -91,22 +90,6 @@ func SaveFile(filePath string, content []byte) error {
 
 func RemoveFile(filePath string) error {
 	err := os.Remove(filePath)
-
-	return err
-}
-
-func ByteToFile(filePath string, byteArray []byte) error {
-	enc := base64.StdEncoding.EncodeToString(byteArray)
-
-	dec, err := base64.StdEncoding.DecodeString(enc)
-	if err != nil {
-		panic(err)
-	}
-
-	err = SaveFile(filePath, dec)
-	if err != nil {
-		return err
-	}
 
 	return err
 }
