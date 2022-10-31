@@ -2,8 +2,11 @@ package token
 
 type (
 	AccessDetails struct {
-		AccessUuid string
-		UserId     int
+		AccessUuid string `json:"access_uuid"`
+		UserId     int    `json:"id"`
+		Name       string `json:"name"`
+		Email      string `json:"email"`
+		Role       string `json:"role"`
 	}
 	TokenDetails struct {
 		AccessToken  string
