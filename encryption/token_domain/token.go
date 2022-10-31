@@ -1,5 +1,7 @@
 package token
 
+import "github.com/labstack/echo/v4"
+
 type (
 	AccessDetails struct {
 		AccessUuid string `json:"access_uuid"`
@@ -8,6 +10,12 @@ type (
 		Email      string `json:"email"`
 		Role       string `json:"role"`
 	}
+
+	AccessDetailsEchoContext struct {
+		echo.Context
+		Access *AccessDetails
+	}
+
 	TokenDetails struct {
 		AccessToken  string
 		RefreshToken string
