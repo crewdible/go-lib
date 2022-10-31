@@ -1,5 +1,14 @@
 package middleware
 
+import (
+	"net/http"
+
+	"github.com/crewdible/go-lib/encryption"
+	token "github.com/crewdible/go-lib/encryption/token_domain"
+	_http "github.com/crewdible/go-lib/http"
+	"github.com/labstack/echo/v4"
+)
+
 // SIDE PROJECT ON PROGRESS
 
 // import (
@@ -39,3 +48,20 @@ package middleware
 // 		return next(c)
 // 	}
 // }
+
+func JWTAuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var err error
+		var accessContext struct {
+			Access *token.AccessDetails
+			echo.Context
+		}
+
+		accessContext.Context = c
+		accessContext.Access, err = encryption.ExtractTokenMetadata(c)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, _http.MapBaseResponse("failed", err.Error(), nil))
+		}
+		return next(accessContext)
+	}
+}
