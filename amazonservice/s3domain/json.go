@@ -76,7 +76,7 @@ type JsonFile struct {
 			PackingTs           *string `json:"packing_ts,omitempty"`
 			ShippingTs          *string `json:"shipping_ts,omitempty"`
 			DoneTs              *string `json:"done_ts,omitempty"`
-			intervalAwb        *int    `json:"interval_awb,omitempty"`
+			intervalAwb         *int    `json:"interval_awb,omitempty"`
 			Awb                 *string `json:"awb,omitempty"`
 			LogAwb              *string `json:"log_awb,omitempty"`
 			OldInv              *int    `json:"old_inv,omitempty"`
@@ -204,7 +204,7 @@ type JsonFile struct {
 			DeliveryFee *int    `json:"delivery_fee,omitempty"`
 			Info        *string `json:"info,omitempty"`
 		} `json:"awb,omitempty"`
-		Compla*int *struct {
+		Complaint *struct {
 			ID           *int    `json:"id,omitempty"`
 			LogType      *int    `json:"log_type,omitempty"`
 			NewLogID     *int    `json:"new_log_id,omitempty"`
