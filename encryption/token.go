@@ -1,6 +1,7 @@
 package encryption
 
 import (
+	"encoding/json"
 	"fmt"
 
 	// _redis "microservice/shared/pkg/database/redis"
@@ -112,22 +113,20 @@ func ExtractTokenMetadata(c echo.Context) (*_token.AccessDetails, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	claims, ok := token.Claims.(jwt.MapClaims)
-	if ok && token.Valid {
-		accessUuid, ok := claims["access_uuid"].(string)
-		if !ok {
-			return nil, err
-		}
-		userId, ok := claims["user_id"].(int)
-		if !ok {
-			return nil, err
-		}
-		return &_token.AccessDetails{
-			AccessUuid: accessUuid,
-			UserId:     userId,
-		}, nil
+	if !ok && !token.Valid {
+		return nil, err
 	}
-	return nil, err
+
+	claimsJSON, err := json.Marshal(claims)
+	if err != nil {
+		return nil, err
+	}
+
+	var res *_token.AccessDetails
+	err = json.Unmarshal(claimsJSON, &res)
+	return res, err
 }
 
 // func FetchAuth(authD *_token.AccessDetails) (string, error) {
