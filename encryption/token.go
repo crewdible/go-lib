@@ -1,11 +1,10 @@
 package encryption
 
 import (
-	"errors"
 	"fmt"
-	_redis "microservice/shared/pkg/database/redis"
+
+	// _redis "microservice/shared/pkg/database/redis"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -54,25 +53,25 @@ func CreateToken(userid int) (*_token.TokenDetails, error) {
 	return td, nil
 }
 
-func CreateAuth(userid string, td *_token.TokenDetails) error {
-	client := _redis.RedisManager()
-	at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
-	rt := time.Unix(td.RtExpires, 0)
-	now := time.Now()
+// func CreateAuth(userid string, td *_token.TokenDetails) error {
+// client := _redis.RedisManager()
+// at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
+// rt := time.Unix(td.RtExpires, 0)
+// now := time.Now()
 
-	errAccess := client.Set(client.Context(), td.AccessUuid, userid, at.Sub(now)).Err()
-	if errAccess != nil {
-		return errAccess
-	}
+// errAccess := client.Set(client.Context(), td.AccessUuid, userid, at.Sub(now)).Err()
+// if errAccess != nil {
+// 	return errAccess
+// }
 
-	errRefresh := client.Set(client.Context(), td.RefreshUuid, userid, rt.Sub(now)).Err()
-	if errRefresh != nil {
-		return errRefresh
-	}
-	return nil
-}
+// errRefresh := client.Set(client.Context(), td.RefreshUuid, userid, rt.Sub(now)).Err()
+// if errRefresh != nil {
+// 	return errRefresh
+// }
+// return nil
+// }
 
-//get the token from the request body
+// get the token from the request body
 func ExtractToken(c echo.Context) string {
 	bearToken := c.Request().Header.Get("Authorization")
 	strArr := strings.Split(bearToken, " ")
@@ -131,50 +130,50 @@ func ExtractTokenMetadata(c echo.Context) (*_token.AccessDetails, error) {
 	return nil, err
 }
 
-func FetchAuth(authD *_token.AccessDetails) (string, error) {
-	client := _redis.RedisManager()
-	userid, err := client.Get(client.Context(), authD.AccessUuid).Result()
-	if err != nil {
-		return "", err
-	}
+// func FetchAuth(authD *_token.AccessDetails) (string, error) {
+// client := _redis.RedisManager()
+// userid, err := client.Get(client.Context(), authD.AccessUuid).Result()
+// if err != nil {
+// 	return "", err
+// }
 
-	userid, err = strconv.Atoi(userid)
-	if err != nil {
-		return "", err
-	}
+// userid, err = strconv.Atoi(userid)
+// if err != nil {
+// 	return "", err
+// }
 
-	if authD.UserId != userid {
-		return "", errors.New("unauthorized")
-	}
-	return userid, nil
-}
+// if authD.UserId != userid {
+// 	return "", errors.New("unauthorized")
+// }
+// return userid, nil
+// }
 
-func DeleteAuth(givenUuid string) (int64, error) {
-	client := _redis.RedisManager()
-	deleted, err := client.Del(client.Context(), givenUuid).Result()
-	if err != nil {
-		return 0, err
-	}
-	return deleted, nil
-}
+// func DeleteAuth(givenUuid string) (int64, error) {
+// 	client := _redis.RedisManager()
+// 	deleted, err := client.Del(client.Context(), givenUuid).Result()
+// 	if err != nil {
+// 		return 0, err
+// 	}
+// 	return deleted, nil
+// }
 
-func DeleteTokens(authD *_token.AccessDetails) error {
-	client := _redis.RedisManager()
-	//get the refresh uuid
-	refreshUuid := fmt.Sprintf("%s++%s", authD.AccessUuid, authD.UserId)
-	//delete access token
-	deletedAt, err := client.Del(client.Context(), authD.AccessUuid).Result()
-	if err != nil {
-		return err
-	}
-	//delete refresh token
-	deletedRt, err := client.Del(client.Context(), refreshUuid).Result()
-	if err != nil {
-		return err
-	}
-	//When the record is deleted, the return value is 1
-	if deletedAt != 1 || deletedRt != 1 {
-		return errors.New("something went wrong")
-	}
-	return nil
-}
+// func DeleteTokens(authD *_token.AccessDetails) error {
+// 	client := _redis.RedisManager()
+// 	//get the refresh uuid
+// 	refreshUuid := fmt.Sprintf("%s++%s", authD.AccessUuid, authD.UserId)
+// 	//delete access token
+// 	deletedAt, err := client.Del(client.Context(), authD.AccessUuid).Result()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	//delete refresh token
+// 	deletedRt, err := client.Del(client.Context(), refreshUuid).Result()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	//When the record is deleted, the return value is 1
+// 	if deletedAt != 1 || deletedRt != 1 {
+// 		return errors.New("something went wrong")
+// 	}
+// 	return nil
+// }
