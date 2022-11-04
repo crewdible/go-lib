@@ -6,10 +6,22 @@ type BaseResponse struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
+type BaseResponseWithMeta struct {
+	BaseResponse
+	Meta interface{}
+}
+
 func MapBaseResponse(status, message string, data interface{}) BaseResponse {
 	return BaseResponse{
 		Status:  status,
 		Message: message,
 		Data:    data,
+	}
+}
+
+func MapBaseResponseWithMeta(status, message string, data interface{}, meta interface{}) BaseResponseWithMeta {
+	return BaseResponseWithMeta{
+		BaseResponse: MapBaseResponse(status, message, data),
+		Meta:         meta,
 	}
 }
