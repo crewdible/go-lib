@@ -1,5 +1,6 @@
 package s3domain
 
+// Update
 type JsonFile struct {
 	Result  *int    `json:"result,omitempty"`
 	Message *string `json:"message,omitempty"`
