@@ -1,6 +1,5 @@
 package s3domain
 
-// Update
 type JsonFile struct {
 	Result  *int    `json:"result,omitempty"`
 	Message *string `json:"message,omitempty"`
@@ -44,7 +43,7 @@ type JsonFile struct {
 			Info                *string `json:"info,omitempty"`
 			Info1               *string `json:"info1,omitempty"`
 			Info2               *string `json:"info2,omitempty"`
-			Info3               *string `json:"info3, omitempty,omitempty"`
+			Info3               *string `json:"info3,omitempty"`
 			PickupType          *string `json:"pickup_type,omitempty"`
 			PickupStatus        *string `json:"pickup_status,omitempty"`
 			ReturnStatus        *string `json:"return_status,omitempty"`
