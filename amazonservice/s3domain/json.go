@@ -3,8 +3,8 @@ package s3domain
 type JsonFile struct {
 	Result  *int    `json:"result,omitempty"`
 	Message *string `json:"message,omitempty"`
-	Data    *struct {
-		Inv *struct {
+	Data    struct {
+		Inv struct {
 			ID                  *int    `json:"id,omitempty"`
 			LogID               *int    `json:"log_id,omitempty"`
 			MoveID              *int    `json:"move_id,omitempty"`
@@ -76,7 +76,7 @@ type JsonFile struct {
 			PackingTs           *string `json:"packing_ts,omitempty"`
 			ShippingTs          *string `json:"shipping_ts,omitempty"`
 			DoneTs              *string `json:"done_ts,omitempty"`
-			intervalAwb         *int    `json:"interval_awb,omitempty"`
+			IntervalAwb         *int    `json:"interval_awb,omitempty"`
 			Awb                 *string `json:"awb,omitempty"`
 			LogAwb              *string `json:"log_awb,omitempty"`
 			OldInv              *int    `json:"old_inv,omitempty"`
