@@ -8,7 +8,7 @@ type BaseResponse struct {
 
 type BaseResponseWithMeta struct {
 	BaseResponse
-	Meta interface{}
+	Meta interface{} `json:"meta"`
 }
 
 func MapBaseResponse(status, message string, data interface{}) BaseResponse {
