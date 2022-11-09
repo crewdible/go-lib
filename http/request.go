@@ -3,7 +3,9 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -11,6 +13,7 @@ import (
 )
 
 func Request(method, url string, header map[string]string, body interface{}, data interface{}) error {
+	var req *http.Request
 	var client = &http.Client{}
 
 	bodyJSON, err := json.Marshal(body)
@@ -18,7 +21,11 @@ func Request(method, url string, header map[string]string, body interface{}, dat
 		return err
 	}
 
-	req, _ := http.NewRequest(method, url, bytes.NewBuffer(bodyJSON))
+	if body == nil {
+		req, _ = http.NewRequest(method, url, nil)
+	} else {
+		req, _ = http.NewRequest(method, url, bytes.NewBuffer(bodyJSON))
+	}
 
 	for k, v := range header {
 		req.Header.Set(k, v)
@@ -34,6 +41,38 @@ func Request(method, url string, header map[string]string, body interface{}, dat
 	if err != nil {
 		return err
 	}
+
+	return err
+}
+
+func RequestDebug(method, url string, header map[string]string, body interface{}) error {
+	var req *http.Request
+	var client = &http.Client{}
+
+	bodyJSON, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	if body == nil {
+		req, _ = http.NewRequest(method, url, nil)
+	} else {
+		req, _ = http.NewRequest(method, url, bytes.NewBuffer(bodyJSON))
+	}
+
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	bodyr, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("RESPONSE")
+	fmt.Println(string(bodyr))
 
 	return err
 }
