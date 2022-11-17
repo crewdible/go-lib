@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -91,6 +92,67 @@ func (a AwsSession) UploadCrewFileToS3(t, acl, filePath, folder, createdAt strin
 	if _, err := os.Stat(thumbsPath); errors.Is(err, os.ErrNotExist) {
 	} else {
 		err := a.UploadFileToS3(bucket, key, acl, thumbsPath, folder, createdAt)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Reader, fileSize int64, filePath, folder, createdAt string) error {
+	// open the file for use
+	// get the file size and read
+	// the file content into a buffer
+
+	buffer := make([]byte, fileSize)
+	file.Read(buffer)
+
+	var aclType types.ObjectCannedACL
+
+	switch aclT := acl; aclT {
+	case "public-read":
+		aclType = types.ObjectCannedACLPublicRead
+	default:
+		aclType = types.ObjectCannedACLPrivate
+	}
+
+	// config settings: this is where you choose the bucket,
+	// filename, content-type and storage class of the file
+	// you're uploading
+	fmt.Println("Simply testing")
+	uploader := manager.NewUploader(a.S3Client)
+	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
+		Bucket:        aws.String(bucket),
+		Key:           aws.String(generateKey(createdAt, folder, key, filePath)),
+		ACL:           aclType,
+		Body:          bytes.NewBuffer(buffer),
+		ContentLength: *aws.Int64(fileSize),
+		ContentType:   aws.String(http.DetectContentType(buffer)),
+		// ContentDisposition: aws.String(cntntDisposition),
+		// ServerSideEncryption: aws.String(sSEnc),
+		// StorageClass:         aws.String(strgClass),
+	})
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (a AwsSession) UploadCrewFileToS3WithReader(t, acl string, file io.Reader, fileSize int64, filePath, folder, createdAt string) error {
+	bkList := getBucketKey(t)
+	bucket := bkList[0]
+	key := bkList[1]
+	err := a.UploadFileToS3WithReader(bucket, key, acl, file, fileSize, filePath, folder, createdAt)
+	if err != nil {
+		return err
+	}
+	lfile := strings.Split(filePath, "/")
+	thumbsPath := fmt.Sprintf("./files/thumbs/%s", lfile[len(lfile)-1])
+	if _, err := os.Stat(thumbsPath); errors.Is(err, os.ErrNotExist) {
+	} else {
+		err := a.UploadFileToS3WithReader(bucket, key, acl, file, fileSize, thumbsPath, folder, createdAt)
 		if err != nil {
 			return err
 		}
