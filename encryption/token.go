@@ -26,7 +26,7 @@ func CreateToken(userid int) (*_token.TokenDetails, error) {
 
 	td.AccessUuid = accUUID.String()
 	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
-	td.RefreshUuid = fmt.Sprintf("%s++%s", td.AccessUuid, userid)
+	td.RefreshUuid = fmt.Sprintf("%s++%d", td.AccessUuid, userid)
 
 	//Creating Access Token
 	os.Setenv("ACCESS_SECRET", "jdnfksdmfksd") //this should be in an env file
