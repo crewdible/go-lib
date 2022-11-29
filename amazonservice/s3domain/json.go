@@ -2,8 +2,8 @@ package s3domain
 
 // Semua yang diubah menjadi interface{} supaya lebih aman untuk sementara
 type JsonFile struct {
-	Result  *interface{} `json:"result,omitempty"`
-	Message *interface{} `json:"message,omitempty"`
+	Result  int    `json:"result"`
+	Message string `json:"message"`
 	Data    struct {
 		Inv struct {
 			ID                  *interface{} `json:"id,omitempty"`
@@ -29,14 +29,14 @@ type JsonFile struct {
 			Message             *interface{} `json:"message,omitempty"`
 			Type                *interface{} `json:"type,omitempty"`
 			Status              *interface{} `json:"status,omitempty"`
-			Attachment          *interface{} `json:"attachment,omitempty"`
+			Attachment          *string      `json:"attachment,omitempty"`
 			Detail              *interface{} `json:"detail,omitempty"`
 			Seller              *interface{} `json:"seller,omitempty"`
 			SellerName          *interface{} `json:"seller_name,omitempty"`
 			SenderName          *interface{} `json:"sender_name,omitempty"`
 			SenderPhone         *interface{} `json:"sender_phone,omitempty"`
 			SenderPhoto         *interface{} `json:"sender_photo,omitempty"`
-			ReceiverName        *interface{} `json:"receiver_name,omitempty"`
+			ReceiverName        *string      `json:"receiver_name,omitempty"`
 			ReceiverAddr        *interface{} `json:"receiver_addr,omitempty"`
 			ReceiverPhone       *interface{} `json:"receiver_phone,omitempty"`
 			ReceiverEmail       *interface{} `json:"receiver_email,omitempty"`
