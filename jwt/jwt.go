@@ -25,6 +25,7 @@ package jwt
 // 	AtExpireIn   int
 // 	RefreshToken string
 // 	RtExpireIn   int
+// 	CreatedAt    int
 // }
 
 // func getJwtSecret() string {
@@ -43,11 +44,24 @@ package jwt
 // 	}
 // }
 
-// func GenerateTokenResponse(userID string) *TokenResponse {
+// func generateTokenResponse(userID, signature string) (string, error) {
+// 	var err error
+// 	atClaims := jwt.MapClaims{}
+// 	atClaims["authorized"] = true
+// 	atClaims["user_id"] = userID
+// 	atClaims["signature"] = signature
+// 	atClaims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+// 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+// 	accessToken, err := at.SignedString([]byte(os.Getenv("JWT_SECRET")))
+// 	if err != nil {
+// 		return "", err
+// 	}
 
+// 	return accessToken, nil
 // }
 
 // func TokenRefresh(c echo.Context) (*TokenResponse, error) {
+// 	tokenRes := *&TokenResponse{}
 // 	token, err := VerifyToken(c)
 // 	if err != nil {
 // 		return nil, err
@@ -66,8 +80,25 @@ package jwt
 // 	var res *TokenCrew
 // 	err = json.Unmarshal(claimsJSON, &res)
 
-// 	at := CreateToken(res.UserID, res.Signature)
-// 	return &TokenResponse{}, err
+// 	res.Signature
+// 	at, err := generateTokenResponse(res.UserID, res.Signature)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	tokenRes.AccessToken = at
+
+// 	return &tokenRes, err
+// }
+
+// func encodeTimestamp(ts string) string {
+// 	replacer := strings.NewReplacer("0", "x", "1", "a", "2", "Z", "3", "d", "4", "K", "5", "t", "6", "S", "7", "f", "8", "Y", "9", "l")
+// 	return replacer.Replace(ts)
+// }
+
+// func decodeTimestamp(ts string) string {
+// 	replacer := strings.NewReplacer("x", "0", "a", "1", "Z", "2", "d", "3", "K", "4", "t", "5", "S", "6", "f", "7", "Y", "8", "l", "9")
+// 	return replacer.Replace(ts)
 // }
 
 // // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
@@ -86,9 +117,8 @@ package jwt
 // 		es = expired
 // 	}
 
-// 	replacer := strings.NewReplacer("0", "x", "1", "a", "2", "Z", "3", "d", "4", "K", "5", "t", "6", "S", "7", "f", "8", "Y", "9", "l")
-// 	ts = replacer.Replace(ts)
-// 	es = replacer.Replace(es)
+// 	ts = encodeTimestamp(ts)
+// 	es = encodeTimestamp(es)
 // 	rt := fmt.Sprintf("%s-%s-", es, ts)
 // 	rand.Seed(time.Now().UTC().UnixNano())
 // 	for i := 0; i < n; i++ {
@@ -98,20 +128,8 @@ package jwt
 // 	return rt
 // }
 
-// func CreateToken(userID, signature string) (string, error) {
-// 	var err error
-// 	atClaims := jwt.MapClaims{}
-// 	atClaims["authorized"] = true
-// 	atClaims["user_id"] = userID
-// 	atClaims["signature"] = signature
-// 	atClaims["exp"] = time.Now().Add(time.Hour * 1).Unix()
-// 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-// 	accessToken, err := at.SignedString([]byte(os.Getenv("JWT_SECRET")))
-// 	if err != nil {
-// 		return "", err
-// 	}
+// func CreateToken(userID, signature string) *TokenResponse {
 
-// 	return accessToken, nil
 // }
 
 // func TokenHasAccess(c echo.Context, userID string) (bool, error) {
