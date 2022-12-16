@@ -7,7 +7,7 @@ import (
 
 func GenerateMultipleQueues(qName string, qTot int) []string {
 	queues := []string{}
-	for i := 1; i <= qTot; i++ {
+	for i := 0; i < qTot; i++ {
 		queue := fmt.Sprintf("%s-%d", qName, i)
 		queues = append(queues, queue)
 	}
