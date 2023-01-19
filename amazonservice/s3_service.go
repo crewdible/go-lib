@@ -31,6 +31,22 @@ func generateKey(createdAt, folder, key, filePath string) string {
 	return fmt.Sprintf("%s/%s/%s/%s", createdAt, folder, key, fileName)
 }
 
+func generateCustomKey(folder, key, filePath string) string {
+	var fileName string
+	lfile := strings.Split(filePath, "/")
+	if lfile[len(lfile)-2] == "thumbs" {
+		fileName = fmt.Sprintf("thumbs/%s", lfile[len(lfile)-1])
+	} else {
+		fileName = lfile[len(lfile)-1]
+	}
+
+	if key == "" {
+		return fmt.Sprintf("%s/%s", folder, fileName)
+	}
+
+	return fmt.Sprintf("%s/%s/%s", folder, key, fileName)
+}
+
 // func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, strgClass, fileName string) error {
 func (a AwsSession) UploadFileToS3(bucket, key, acl, filePath, folder, createdAt string) error {
 	// open the file for use
@@ -120,11 +136,10 @@ func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Re
 	// config settings: this is where you choose the bucket,
 	// filename, content-type and storage class of the file
 	// you're uploading
-	fmt.Println("Simply testing")
 	uploader := manager.NewUploader(a.S3Client)
 	_, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:        aws.String(bucket),
-		Key:           aws.String(generateKey(createdAt, folder, key, filePath)),
+		Key:           aws.String(generateCustomKey(folder, key, filePath)),
 		ACL:           aclType,
 		Body:          bytes.NewBuffer(buffer),
 		ContentLength: *aws.Int64(fileSize),
