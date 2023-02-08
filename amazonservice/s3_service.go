@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -122,10 +123,9 @@ func (a AwsSession) UploadCrewFileToS3(t, acl, filePath, folder, createdAt strin
 	return nil
 }
 
-func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Reader, fileSize int64, filePath, folder string) error {
+func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Reader, filePath, folder string) error {
 
-	buffer := make([]byte, fileSize)
-	file.Read(buffer)
+	buffer, err := ioutil.ReadAll(file)
 
 	var aclType types.ObjectCannedACL
 
@@ -142,7 +142,7 @@ func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Re
 		Key:           aws.String(strings.Trim(generateCustomKey(folder, key, filePath), "/")),
 		ACL:           aclType,
 		Body:          bytes.NewBuffer(buffer),
-		ContentLength: *aws.Int64(fileSize),
+		ContentLength: *aws.Int64(int64(len(buffer))),
 		ContentType:   aws.String(http.DetectContentType(buffer)),
 		// ContentDisposition: aws.String(cntntDisposition),
 		// ServerSideEncryption: aws.String(sSEnc),
@@ -157,11 +157,11 @@ func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Re
 	return err
 }
 
-func (a AwsSession) UploadCrewFileToS3WithReader(t, acl string, file io.Reader, fileSize int64, filePath, folder string) error {
+func (a AwsSession) UploadCrewFileToS3WithReader(t, acl string, file io.Reader, filePath, folder string) error {
 	bkList := getBucketKey(t)
 	bucket := bkList[0]
 	key := bkList[1]
-	err := a.UploadFileToS3WithReader(bucket, key, acl, file, fileSize, filePath, folder)
+	err := a.UploadFileToS3WithReader(bucket, key, acl, file, filePath, folder)
 	if err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (a AwsSession) UploadCrewFileToS3WithReader(t, acl string, file io.Reader, 
 	thumbsPath := fmt.Sprintf("./files/thumbs/%s", lfile[len(lfile)-1])
 	if _, err := os.Stat(thumbsPath); errors.Is(err, os.ErrNotExist) {
 	} else {
-		err := a.UploadFileToS3WithReader(bucket, key, acl, file, fileSize, thumbsPath, folder)
+		err := a.UploadFileToS3WithReader(bucket, key, acl, file, thumbsPath, folder)
 		if err != nil {
 			return err
 		}
