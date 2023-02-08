@@ -41,17 +41,11 @@ func generateCustomKey(folder, key, filePath string) string {
 		fileName = lfile[len(lfile)-1]
 	}
 
-	var res string
-
-	if folder != "" {
-		res += folder + "/"
+	if key == "" {
+		return fmt.Sprintf("%s/%s", folder, fileName)
 	}
 
-	if key != "" {
-		res += key + "/"
-	}
-
-	return res + fileName
+	return fmt.Sprintf("%s/%s/%s", folder, key, fileName)
 }
 
 // func (a AwsSession) UploadFileToS3(bucket, key, acl, cntntDisposition, sSEnc, strgClass, fileName string) error {
@@ -136,10 +130,13 @@ func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Re
 		aclType = types.ObjectCannedACLPrivate
 	}
 
+	// config settings: this is where you choose the bucket,
+	// filename, content-type and storage class of the file
+	// you're uploading
 	uploader := manager.NewUploader(a.S3Client)
 	output, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
 		Bucket:        aws.String(bucket),
-		Key:           aws.String(strings.Trim(generateCustomKey(folder, key, filePath), "/")),
+		Key:           aws.String(generateCustomKey(folder, key, filePath)),
 		ACL:           aclType,
 		Body:          bytes.NewBuffer(buffer),
 		ContentLength: *aws.Int64(int64(len(buffer))),
