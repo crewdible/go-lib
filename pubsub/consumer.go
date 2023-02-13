@@ -2,6 +2,7 @@ package pubsub
 
 import (
 	"os"
+	"strconv"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -35,10 +36,19 @@ func (c *Connection) HandleConsumedDeliveries(q string, delivery <-chan amqp.Del
 }
 
 func (c *Connection) CrewBasicHandleConsumedDeliveries(rtry bool, q string, delivery <-chan amqp.Delivery, router func(string, []byte) error) {
-	var pubConn *Connection
-	pubConn = GetConnection(os.Getenv("RMQ_PUBLISHER_CONNECTION"))
+	var (
+		pubConn *Connection
+		maxRtry = 3
+	)
+	pubConn = GetConnection(os.Getenv("RMQ_PRODUCER_NAME"))
+	if os.Getenv("RMQ_MAX_RETRY") != "" {
+		mxrtry, err := strconv.Atoi(os.Getenv("RMQ_MAX_RETRY"))
+		if err == nil {
+			maxRtry = mxrtry
+		}
+	}
 	for {
-		go crewBasicMessageHandler(pubConn, rtry, q, delivery, router)
+		go crewBasicMessageHandler(pubConn, maxRtry, rtry, q, delivery, router)
 		if err := <-c.err; err != nil {
 			c.Reconnect()
 			deliveries, err := c.Consume()
