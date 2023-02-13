@@ -3,6 +3,7 @@ package pubsub
 import (
 	"fmt"
 
+	"github.com/crewdible/go-lib/stringlib"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -27,4 +28,31 @@ func (c *Connection) Publish(m Message) error {
 		return fmt.Errorf("Error in Publishing: %s", err)
 	}
 	return nil
+}
+
+func (c *Connection) CrewBasicPublish(qname string, msg interface{}, retry bool) error {
+	var rtry int
+	if retry {
+		rtry = 0
+	} else {
+		rtry = 100
+	}
+
+	msgStr, err := stringlib.StructToJsonString(msg)
+	if err != nil {
+		return err
+	}
+
+	m := Message{
+		Headers:     amqp.Table{"x-amqp-delivery-count": int32(rtry)},
+		Queue:       qname,
+		ContentType: "application/json",
+		Body: MessageBody{
+			Data: []byte(msgStr),
+		},
+	}
+
+	err = c.Publish(m)
+
+	return err
 }

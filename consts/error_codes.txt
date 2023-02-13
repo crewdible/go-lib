@@ -1,0 +1,17 @@
+field 1
+SC : success
+UE : unknown error
+BR : bad request
+SE : server error
+
+
+field 2
+INT : internal
+EKS : eksternal (Marketplace dkk)
+
+field 3
+00 : internal
+01 : marketplace
+02 : ecommerce
+03 : 3PL
+04 : payment

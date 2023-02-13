@@ -1,6 +1,8 @@
 package pubsub
 
 import (
+	"os"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -30,4 +32,58 @@ func (c *Connection) HandleConsumedDeliveries(q string, delivery <-chan amqp.Del
 			delivery = deliveries[q]
 		}
 	}
+}
+
+func (c *Connection) CrewBasicHandleConsumedDeliveries(rtry bool, q string, delivery <-chan amqp.Delivery, router func(string, []byte) error) {
+	var pubConn *Connection
+	pubConn = GetConnection(os.Getenv("RMQ_PUBLISHER_CONNECTION"))
+	for {
+		go crewBasicMessageHandler(pubConn, rtry, q, delivery, router)
+		if err := <-c.err; err != nil {
+			c.Reconnect()
+			deliveries, err := c.Consume()
+			if err != nil {
+				panic(err) //raising panic if consume fails even after reconnecting
+			}
+			delivery = deliveries[q]
+		}
+	}
+}
+
+func crewBasicMessageHandler(pubConn *Connection, maxRtry int, rtry bool, q string, deliveries <-chan amqp.Delivery, router func(string, []byte) error) {
+	var err error
+	if rtry {
+		for d := range deliveries {
+			deliverCount := d.Headers["x-amqp-delivery-count"].(int32)
+			m := Message{
+				Headers:     amqp.Table{"x-amqp-delivery-count": deliverCount + 1},
+				Queue:       q,
+				ContentType: d.ContentType,
+				Body: MessageBody{
+					Data: d.Body,
+				},
+			}
+
+			err = router(q, d.Body)
+
+			if err != nil && deliverCount >= int32(maxRtry) {
+				d.Nack(false, false)
+			} else if err != nil {
+				pubConn.Publish(m)
+				d.Nack(false, false)
+			} else {
+				d.Ack(false)
+			}
+		}
+	} else {
+		for d := range deliveries {
+			err = router(q, d.Body)
+			if err != nil {
+				d.Nack(false, false)
+			} else {
+				d.Ack(false)
+			}
+		}
+	}
+
 }
