@@ -58,3 +58,39 @@ func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) e
 
 	return nil
 }
+
+// Store Access Token or any other json file
+func WriteOtherFile(baseDir, tName, clsName, fnName, content, ip string) error {
+	dirName := fmt.Sprintf("log/%s", baseDir)
+	err := MkDir(dirName)
+	if err != nil {
+		return err
+	}
+
+	// open log file
+	fileName := fmt.Sprintf("%s.json", fnName)
+	logFile, err := os.OpenFile(fileName, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer logFile.Close()
+
+	// Set Date to the log : user log.SetFlag()
+	// 0 means delete default time format
+	log.SetFlags(0)
+
+	// Set log out put and enjoy :)
+	log.SetOutput(logFile)
+
+	// optional: log date-time, filename, and line number
+	log.Println(fmt.Sprintf("%s\n", content))
+
+	// reset log settings
+	log.SetFlags(log.LstdFlags)
+
+	log.SetPrefix("")
+
+	log.SetOutput(os.Stdout)
+
+	return nil
+}
