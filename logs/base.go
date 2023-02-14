@@ -60,7 +60,7 @@ func WriteLogFile(tName, clsName, fnName, content, ip string, singleFile bool) e
 }
 
 // Store Access Token or any other json file
-func WriteOtherFile(baseDir, tName, clsName, fnName, content, ip string) error {
+func WriteOtherFile(baseDir, fnName, content, ip string) error {
 	dirName := fmt.Sprintf("log/%s", baseDir)
 	err := MkDir(dirName)
 	if err != nil {
