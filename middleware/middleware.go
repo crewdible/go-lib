@@ -49,6 +49,7 @@ func ErrorAndLoggingHandler(serviceName string) func(functionName string) echo.M
 				newReqBody := bytes.NewBuffer(nil)
 				reqBody, err := ioutil.ReadAll(io.TeeReader(req.Body, newReqBody))
 				if err != nil {
+					logger.Log("error", err.Error())
 					return _http.RespondErrorJSON(c, errors.Errors(err, &errors.ErrorOption{
 						HTTPCode: http.StatusBadRequest,
 					}))
@@ -66,11 +67,12 @@ func ErrorAndLoggingHandler(serviceName string) func(functionName string) echo.M
 
 				err = next(c)
 				if err != nil {
+					logger.Log("error", err.Error())
 					return _http.RespondErrorJSON(c, err)
 				}
 
 				if resp, ok := c.Get("response").([]byte); ok {
-					logger.Log("respponse", resp)
+					logger.Log("response", jsonByte(resp))
 				}
 
 				return nil
