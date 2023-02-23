@@ -14,12 +14,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type jsonByte []byte
+
+func (jb jsonByte) MarshalJSON() ([]byte, error) {
+	return jb, nil
+}
+
 type requestLog struct {
-	Timestamp   string `json:"timestamp"`
-	RequestID   string `json:"requestId"`
-	URL         string `json:"url"`
-	ContentType string `json:"contentType,omitempty"`
-	Body        []byte `json:"body,omitempty"`
+	Timestamp   string   `json:"timestamp"`
+	RequestID   string   `json:"requestId"`
+	URL         string   `json:"url"`
+	ContentType string   `json:"contentType,omitempty"`
+	Body        jsonByte `json:"body,omitempty"`
 }
 
 func ErrorAndLoggingHandler(serviceName string) func(functionName string) echo.MiddlewareFunc {
@@ -54,7 +60,7 @@ func ErrorAndLoggingHandler(serviceName string) func(functionName string) echo.M
 					RequestID:   reqID,
 					URL:         url,
 					ContentType: contentType,
-					Body:        reqBody,
+					Body:        jsonByte(reqBody),
 					Timestamp:   now.Format("2006-01-02 15:04:05"),
 				})
 

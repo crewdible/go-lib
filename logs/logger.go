@@ -14,8 +14,6 @@ import (
 // var mu = &sync.Mutex{}
 
 type (
-	jsonByte []byte
-
 	jsonLogger struct {
 		logName     string
 		logFilePath string
@@ -47,9 +45,6 @@ func NewLogger(serviceType, serviceName, functionName string) Logger {
 }
 
 func (l *jsonLogger) Log(caption string, data interface{}) {
-	if v, ok := data.([]byte); ok {
-		data = jsonByte(v)
-	}
 	l.logs[caption] = data
 }
 
@@ -64,10 +59,6 @@ func (l *jsonLogger) Flush() error {
 	enc.SetIndent("", "    ")
 	return enc.Encode(l.logs)
 
-}
-
-func (jb jsonByte) MarshalJSON() ([]byte, error) {
-	return jb, nil
 }
 
 // func (l *jsonLogger) Flush() error {
