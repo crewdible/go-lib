@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"bytes"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -32,19 +34,21 @@ func ErrorAndLoggingHandler(serviceName string) func(functionName string) echo.M
 
 				timeloc, _ := time.LoadLocation("Asia/Jakarta")
 				now := time.Now().In(timeloc)
-
 				var reqBody []byte
 				req := c.Request()
+
 				reqID := stringlib.GenerateRandString(5)
 				contentType := req.Header.Get("Content-Type")
 				url := req.Host + req.URL.RequestURI()
-
-				reqBody, err := io.ReadAll(req.Body)
+				newReqBody := bytes.NewBuffer(nil)
+				reqBody, err := ioutil.ReadAll(io.TeeReader(req.Body, newReqBody))
 				if err != nil {
 					return _http.RespondErrorJSON(c, errors.Errors(err, &errors.ErrorOption{
 						HTTPCode: http.StatusBadRequest,
 					}))
 				}
+
+				c.Request().Body = io.NopCloser(newReqBody)
 
 				logger.Log("request", requestLog{
 					RequestID:   reqID,
