@@ -72,3 +72,8 @@ func (m *SQLManager) GetConn(ctx context.Context, connName string) *gorm.DB {
 
 	return m.conns[trxID]
 }
+
+func (m *SQLManager) HasTransaction(ctx context.Context) bool {
+	trxID, _ := ctx.Value("trx_id").(string)
+	return trxID != ""
+}
