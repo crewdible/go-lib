@@ -68,7 +68,7 @@ func WriteOtherFile(baseDir, fnName, content, ip string) error {
 	}
 
 	// open log file
-	fileName := fmt.Sprintf("%s.json", fnName)
+	fileName := fmt.Sprintf("%s/%s.json", dirName, fnName)
 	logFile, err := os.OpenFile(fileName, os.O_TRUNC|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
