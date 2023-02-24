@@ -63,6 +63,7 @@ func RequestPostJson(method, url string, header map[string]string, body interfac
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
