@@ -48,7 +48,12 @@ func MapBaseResponseWithMeta(status, message string, data interface{}, meta inte
 }
 
 func RespondSuccessJSON(c echo.Context, data interface{}) error {
-	dataByte, err := json.MarshalIndent(data, "", "    ")
+	resp := BaseResponse{
+		Data:   data,
+		Status: "success",
+	}
+
+	dataByte, err := json.MarshalIndent(resp, "", "    ")
 	if err != nil {
 		return err
 	}
