@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 
 	"github.com/crewdible/go-lib/stringlib"
 )
@@ -21,6 +22,7 @@ type (
 		Begin(ctx context.Context) (context.Context, error)
 		Commit(ctx context.Context) (context.Context, error)
 		Rollback(ctx context.Context) (context.Context, error)
+		RollbackIfNotCommited(ctx context.Context) (context.Context, error)
 	}
 )
 
@@ -40,6 +42,9 @@ func (trx *contextTranasction) Begin(ctx context.Context) (context.Context, erro
 }
 
 func (trx *contextTranasction) Commit(ctx context.Context) (context.Context, error) {
+	if ctx.Value("trx_id") == nil {
+		return ctx, errors.New("no transaction to commit")
+	}
 	for _, da := range trx.trxs {
 		err := da.Commit(ctx)
 		if err != nil {
@@ -52,6 +57,20 @@ func (trx *contextTranasction) Commit(ctx context.Context) (context.Context, err
 }
 
 func (trx *contextTranasction) Rollback(ctx context.Context) (context.Context, error) {
+	if ctx.Value("trx_id") == nil {
+		return ctx, errors.New("no transaction to rollback")
+	}
+	for _, da := range trx.trxs {
+		err := da.Rollback(ctx)
+		if err != nil {
+			return ctx, err
+		}
+	}
+	ctx = context.WithValue(ctx, "trx_id", nil)
+	return ctx, nil
+}
+
+func (trx *contextTranasction) RollbackIfNotCommited(ctx context.Context) (context.Context, error) {
 	for _, da := range trx.trxs {
 		err := da.Rollback(ctx)
 		if err != nil {
