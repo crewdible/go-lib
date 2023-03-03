@@ -5,6 +5,19 @@ import (
 	"strings"
 )
 
+func Truncate(str string, length int) (truncated string) {
+	if length <= 0 {
+		return
+	}
+	for i, char := range str {
+		if i >= length {
+			break
+		}
+		truncated += string(char)
+	}
+	return
+}
+
 // Chunks string every chunkSize => Chunks("Hello",2) = ["He", "ll", "o"]
 func Chunks(s string, chunkSize int) []string {
 	if len(s) == 0 {

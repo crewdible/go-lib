@@ -80,6 +80,40 @@ func RequestPostJson(method, url string, header map[string]string, body interfac
 	return err
 }
 
+func RequestPostJsonDebug(method, url string, header map[string]string, body interface{}, data interface{}) error {
+	var req *http.Request
+	var client = &http.Client{}
+
+	bodyJSON, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	if body == nil {
+		req, _ = http.NewRequest(method, url, nil)
+	} else {
+		req, _ = http.NewRequest(method, url, bytes.NewBuffer(bodyJSON))
+	}
+
+	for k, v := range header {
+		req.Header.Set(k, v)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	bodyr, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("RESPONSE")
+	fmt.Println(string(bodyr))
+
+	return err
+}
+
 func RequestWithErrResp(method, url string, header map[string]string, body, data, errRes interface{}) error {
 	var req *http.Request
 	var client = &http.Client{}
