@@ -97,6 +97,8 @@ func getBucketKey(t string) []string {
 			return []string{"crewdible-outbound", "attachment"}
 		case "JSON":
 			return []string{"crewdible-outbound", ""}
+		case "EXCEL":
+			return []string{"crewdible-pub", "excel"}
 		default:
 			return []string{"crewdible-pub", "test"}
 		}
@@ -122,6 +124,8 @@ func getBucketKey(t string) []string {
 			return []string{"crewdible-sandbox-outbound", "attachment"}
 		case "JSON":
 			return []string{"crewdible-sandbox-outbound", ""}
+		case "EXCEL":
+			return []string{"crewdible-sandbox-pub", "excel"}
 		default:
 			return []string{"crewdible-sandbox-pub", "test"}
 		}
