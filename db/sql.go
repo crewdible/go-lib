@@ -31,6 +31,11 @@ func (m *SQLManager) Commit(ctx context.Context) error {
 	if !ok {
 		return nil
 	}
+
+	if _, exist := m.conns[trxID]; !exist {
+		return nil
+	}
+
 	err := m.conns[trxID].Commit().Error
 	delete(m.conns, trxID)
 
@@ -48,6 +53,10 @@ func (m *SQLManager) Rollback(ctx context.Context) error {
 
 	trxID, ok := ctx.Value("trx_id").(string)
 	if !ok {
+		return nil
+	}
+
+	if _, exist := m.conns[trxID]; !exist {
 		return nil
 	}
 
