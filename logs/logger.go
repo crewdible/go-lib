@@ -56,7 +56,6 @@ func (l *jsonLogger) Flush() error {
 	}
 
 	enc := json.NewEncoder(logFile)
-	enc.SetIndent("", "    ")
 	return enc.Encode(l.logs)
 
 }
