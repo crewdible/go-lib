@@ -55,6 +55,8 @@ func (l *jsonLogger) Flush() error {
 		return err
 	}
 
+	defer logFile.Close()
+
 	enc := json.NewEncoder(logFile)
 	return enc.Encode(l.logs)
 

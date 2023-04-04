@@ -123,30 +123,30 @@ func (a AwsSession) UploadCrewFileToS3(t, acl, filePath, folder, createdAt strin
 	return nil
 }
 
-func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Reader, filePath, folder string) error {
+func (a AwsSession) UploadFileToS3WithReader(payload UploadWithReaderPayload) error {
 
-	buffer, err := ioutil.ReadAll(file)
+	buffer, err := ioutil.ReadAll(payload.File)
+	if err != nil {
+		return err
+	}
 
 	var aclType types.ObjectCannedACL
-
-	switch aclT := acl; aclT {
+	switch aclT := payload.Access; aclT {
 	case "public-read":
 		aclType = types.ObjectCannedACLPublicRead
 	default:
 		aclType = types.ObjectCannedACLPrivate
 	}
 
+	key := strings.Trim(payload.Folder, "/") + "/" + strings.Trim(payload.FileName, "/")
 	uploader := manager.NewUploader(a.S3Client)
 	output, err := uploader.Upload(context.TODO(), &s3.PutObjectInput{
-		Bucket:        aws.String(bucket),
-		Key:           aws.String(strings.Trim(generateCustomKey(folder, key, filePath), "/")),
+		Bucket:        aws.String(getBucketName(payload.Bucket)),
+		Key:           aws.String(key),
 		ACL:           aclType,
 		Body:          bytes.NewBuffer(buffer),
 		ContentLength: *aws.Int64(int64(len(buffer))),
 		ContentType:   aws.String(http.DetectContentType(buffer)),
-		// ContentDisposition: aws.String(cntntDisposition),
-		// ServerSideEncryption: aws.String(sSEnc),
-		// StorageClass:         aws.String(strgClass),
 	})
 	if err != nil {
 		return err
@@ -157,23 +157,14 @@ func (a AwsSession) UploadFileToS3WithReader(bucket, key, acl string, file io.Re
 	return err
 }
 
-func (a AwsSession) UploadCrewFileToS3WithReader(t, acl string, file io.Reader, filePath, folder string) error {
-	bkList := getBucketKey(t)
-	bucket := bkList[0]
-	key := bkList[1]
-	err := a.UploadFileToS3WithReader(bucket, key, acl, file, filePath, folder)
-	if err != nil {
-		return err
-	}
-	lfile := strings.Split(filePath, "/")
-	thumbsPath := fmt.Sprintf("./files/thumbs/%s", lfile[len(lfile)-1])
-	if _, err := os.Stat(thumbsPath); errors.Is(err, os.ErrNotExist) {
-	} else {
-		err := a.UploadFileToS3WithReader(bucket, key, acl, file, thumbsPath, folder)
-		if err != nil {
-			return err
-		}
-	}
+type UploadWithReaderPayload struct {
+	Bucket   string
+	File     io.Reader
+	FileName string
+	Folder   string
+	Access   string
+}
 
-	return nil
+func (a AwsSession) UploadCrewFileToS3WithReader(payload UploadWithReaderPayload) error {
+	return a.UploadFileToS3WithReader(payload)
 }

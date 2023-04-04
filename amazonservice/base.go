@@ -131,3 +131,31 @@ func getBucketKey(t string) []string {
 		}
 	}
 }
+
+var productionBucketNames = map[string]string{
+	"pub":      "crewdible-pub",
+	"outbound": "crewdible-outbound",
+}
+
+var nonProductionBucketNames = map[string]string{
+	"pub":      "crewdible-sandbox-pub",
+	"outbound": "crewdible-sandbox-outbound",
+}
+
+func getBucketName(key string) string {
+	envName := os.Getenv("ENV_NAME")
+	if envName == "PRODUCTION" {
+		name, exist := productionBucketNames[key]
+		if exist {
+			return name
+		}
+		return "crewdible-" + name
+	}
+
+	name, exist := nonProductionBucketNames[key]
+	if exist {
+		return name
+	}
+
+	return "crewdible-sandbox-" + name
+}

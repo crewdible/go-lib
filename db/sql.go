@@ -9,12 +9,13 @@ import (
 
 // temp name
 type SQLManager struct {
-	mu    *sync.Mutex
-	conns map[string]*gorm.DB
+	mu          *sync.Mutex
+	conns       map[string]*gorm.DB
+	trxPrefixes map[string]map[string]bool
 }
 
 func NewSQLManager(conns map[string]*gorm.DB) *SQLManager {
-	return &SQLManager{conns: conns, mu: &sync.Mutex{}}
+	return &SQLManager{conns: conns, mu: &sync.Mutex{}, trxPrefixes: map[string]map[string]bool{}}
 }
 
 func (m *SQLManager) Begin(ctx context.Context) error {
@@ -32,12 +33,23 @@ func (m *SQLManager) Commit(ctx context.Context) error {
 		return nil
 	}
 
-	if _, exist := m.conns[trxID]; !exist {
+	if _, exist := m.trxPrefixes[trxID]; !exist {
 		return nil
 	}
 
-	err := m.conns[trxID].Commit().Error
-	delete(m.conns, trxID)
+	for prefix := range m.trxPrefixes[trxID] {
+		conn, exist := m.conns[prefix+"_"+trxID]
+		if !exist {
+			continue
+		}
+
+		err := conn.Commit().Error
+		if err != nil {
+			m.Rollback(ctx)
+			return err
+		}
+		delete(m.conns, prefix+"_"+trxID)
+	}
 
 	return err
 }
@@ -56,12 +68,19 @@ func (m *SQLManager) Rollback(ctx context.Context) error {
 		return nil
 	}
 
-	if _, exist := m.conns[trxID]; !exist {
+	_, exist := m.trxPrefixes[trxID]
+	if !exist {
 		return nil
 	}
+	for prefix := range m.trxPrefixes[trxID] {
+		conn, exist := m.conns[prefix+"_"+trxID]
+		if !exist {
+			continue
+		}
+		conn.Rollback()
+		delete(m.conns, prefix+"_"+trxID)
+	}
 
-	err := m.conns[trxID].Rollback().Error
-	delete(m.conns, trxID)
 	return err
 }
 
@@ -75,11 +94,15 @@ func (m *SQLManager) GetConn(ctx context.Context, connName string) *gorm.DB {
 		return m.conns[connName]
 	}
 
-	if _, exist := m.conns[trxID]; !exist {
-		m.conns[trxID] = m.conns[connName].Begin()
+	_, exist := m.trxPrefixes[trxID]
+	if !exist {
+		m.trxPrefixes[trxID] = map[string]bool{}
+		m.conns[connName+"_"+trxID] = m.conns[connName].Begin()
 	}
 
-	return m.conns[trxID]
+	m.trxPrefixes[trxID][connName] = true
+
+	return m.conns[connName+"_"+trxID]
 }
 
 func (m *SQLManager) HasTransaction(ctx context.Context) bool {
