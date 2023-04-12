@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -18,6 +20,7 @@ type (
 		logName     string
 		logFilePath string
 		logs        map[string]interface{}
+		mu          sync.Mutex
 	}
 
 	Logger interface {
@@ -41,6 +44,7 @@ func NewLogger(serviceType, serviceName, functionName string) Logger {
 		logFilePath: fmt.Sprintf("%s/%s.json", dirName, functionName),
 		logName:     fmt.Sprintf("%s%s%s", serviceName, functionName, nowStr),
 		logs:        map[string]interface{}{},
+		mu:          sync.Mutex{},
 	}
 }
 
@@ -49,6 +53,8 @@ func (l *jsonLogger) Log(caption string, data interface{}) {
 }
 
 func (l *jsonLogger) Flush() error {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 
 	logFile, err := os.OpenFile(l.logFilePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -58,8 +64,16 @@ func (l *jsonLogger) Flush() error {
 	defer logFile.Close()
 
 	enc := json.NewEncoder(logFile)
-	return enc.Encode(l.logs)
+	for k, v := range l.logs {
+		k = strings.ToUpper(fmt.Sprintf("\n ======= %s \n", k))
+		logFile.Write([]byte(k))
+		err = enc.Encode(v)
+		if err != nil {
+			return err
+		}
+	}
 
+	return nil
 }
 
 // func (l *jsonLogger) Flush() error {
