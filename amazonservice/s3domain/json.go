@@ -45,6 +45,8 @@ type JsonFile struct {
 			Info1               *interface{} `json:"info1,omitempty"`
 			Info2               *interface{} `json:"info2,omitempty"`
 			Info3               *interface{} `json:"info3,omitempty"`
+			IsMarketplace       *interface{} `json:"is_marketplace,omitempty"`
+			IsBookingCode       *interface{} `json:"is_booking_code,omitempty"`
 			PickupType          *interface{} `json:"pickup_type,omitempty"`
 			PickupStatus        *interface{} `json:"pickup_status,omitempty"`
 			ReturnStatus        *interface{} `json:"return_status,omitempty"`
